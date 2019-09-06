@@ -53,6 +53,8 @@ public class PickSetup implements Serializable {
 
     private boolean isCameraToPictures;
 
+    private int uxLoadingSleep;
+
     @OrientationMode
     private int buttonOrientation;
 
@@ -267,6 +269,18 @@ public class PickSetup implements Serializable {
         return this;
     }
 
+    public int getMinLoadingTime() {
+        return uxLoadingSleep;
+    }
+
+    /**
+     * Sets minimum loading time in ms loading should be displayed to the user
+     */
+    public PickSetup setMinLoadingTime(int minLoadingTime) {
+        this.uxLoadingSleep = minLoadingTime;
+        return this;
+    }
+
     @IconGravity
     public int getIconGravity() {
         return iconGravity;
@@ -282,7 +296,6 @@ public class PickSetup implements Serializable {
         return this;
     }
 
-
     public PickSetup() {
         setTitle("Choose")
                 .setBackgroundColor(Color.WHITE)
@@ -297,9 +310,10 @@ public class PickSetup implements Serializable {
                 .setProgressText("Loading...")
                 .setButtonOrientation(LinearLayout.VERTICAL)
                 .setCameraIcon(R.drawable.camera)
+                .setGalleryIcon(R.drawable.gallery)
                 .setSystemDialog(false)
                 .setCameraToPictures(true)
-                .setGalleryIcon(R.drawable.gallery);
+                .setMinLoadingTime(1000); //in ms
     }
 
 }

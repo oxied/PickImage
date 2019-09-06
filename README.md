@@ -47,7 +47,7 @@ allprojects {
 #### Step #2. Add the dependency ([See latest release](https://jitpack.io/#oxied/PickImage)).
 ```groovy
 dependencies {
-    implementation 'com.github.oxied:PickImage:2.2.0'
+    implementation 'com.github.oxied:PickImage:2.2.1'
 }
 ```
 # Implementation
@@ -136,6 +136,7 @@ PickSetup setup = new PickSetup()
             .setButtonOrientation(LinearLayoutCompat.VERTICAL)
             .setSystemDialog(false)
             .setCameraToPictures(false)
+            .setMinLoadingTime(2000); //in ms. 1000 is default to avoid dialog flipping
             .setGalleryIcon(yourIcon)
             .setCameraIcon(yourIcon);
 /*... and more to come. */

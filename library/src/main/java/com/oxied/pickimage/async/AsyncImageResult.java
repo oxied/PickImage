@@ -22,6 +22,8 @@ public class AsyncImageResult extends AsyncTask<Intent, Void, PickResult> {
     private WeakReference<PickSetup> weakSetup;
     private OnFinish onFinish;
 
+    private long startTime = System.currentTimeMillis();
+
     public AsyncImageResult(IntentResolver intentResolver, PickSetup setup) {
         this.weakIntentResolver = new WeakReference<>(intentResolver);
         this.weakSetup = new WeakReference<>(setup);
@@ -63,6 +65,11 @@ public class AsyncImageResult extends AsyncTask<Intent, Void, PickResult> {
                     .setPath(imageHandler.getUriPath())
                     .setBitmap(imageHandler.decode());
 
+            long passedTime = System.currentTimeMillis() - startTime;
+            if (weakSetup.get().getMinLoadingTime() != 0
+                    && passedTime < weakSetup.get().getMinLoadingTime()) {
+                Thread.sleep(weakSetup.get().getMinLoadingTime() - passedTime);
+            }
 
             return result;
         } catch (Exception e) {
