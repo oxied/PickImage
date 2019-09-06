@@ -1,5 +1,7 @@
 # Fork of https://github.com/jrvansuita/PickImage
 - Added support for multiple camera files and storing them on sdcard/Pictures/[AppName]
+- Moved to AndroidX instead of android support library
+- Added support for Android 8 (Oreo)
 
 <!-- Library Logo -->
 <img src="https://github.com/jrvansuita/PickImage/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png?raw=true" align="left" hspace="1" vspace="1">
@@ -45,7 +47,7 @@ allprojects {
 #### Step #2. Add the dependency ([See latest release](https://jitpack.io/#oxied/PickImage)).
 ```groovy
 dependencies {
-    compile 'com.github.jrvansuita:PickImage:+'
+    implementation 'com.github.oxied:PickImage:2.2.0'
 }
 ```
 # Implementation
@@ -56,8 +58,8 @@ The use of this library can cause [INSTALL_FAILED_CONFLICTING_PROVIDER](https://
 <manifest ...>
     <application ...>
         <provider
-            android:name="android.support.v4.content.FileProvider"
-            android:authorities="${applicationId}.com.vansuita.pickimage.provider"
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.com.oxied.pickimage.provider"
             android:exported="false"
             android:grantUriPermissions="true"
             tools:replace="android:authorities">
