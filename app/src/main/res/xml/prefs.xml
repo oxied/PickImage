@@ -41,30 +41,32 @@
 
     <PreferenceCategory android:title="@string/colors">
 
-        <com.jrummyapps.android.colorpicker.ColorPreference
-            android:defaultValue="@android:color/white"
-            android:key="@string/key_background_color"
-            android:title="@string/background_color" />
+<!--        TODO restore support for colorpicker: -->
 
-        <com.jrummyapps.android.colorpicker.ColorPreference
-            android:defaultValue="@color/primaryText"
-            android:key="@string/key_title_color"
-            android:title="@string/title_color" />
+<!--        <com.jrummyapps.android.colorpicker.ColorPreference-->
+<!--            android:defaultValue="@android:color/white"-->
+<!--            android:key="@string/key_background_color"-->
+<!--            android:title="@string/background_color" />-->
 
-        <com.jrummyapps.android.colorpicker.ColorPreference
-            android:defaultValue="@color/primaryText"
-            android:key="@string/key_button_text_color"
-            android:title="@string/button_text_color" />
+<!--        <com.jrummyapps.android.colorpicker.ColorPreference-->
+<!--            android:defaultValue="@color/primaryText"-->
+<!--            android:key="@string/key_title_color"-->
+<!--            android:title="@string/title_color" />-->
 
-        <com.jrummyapps.android.colorpicker.ColorPreference
-            android:defaultValue="@color/primaryText"
-            android:key="@string/key_cancel_text_color"
-            android:title="@string/cancel_text_color" />
+<!--        <com.jrummyapps.android.colorpicker.ColorPreference-->
+<!--            android:defaultValue="@color/primaryText"-->
+<!--            android:key="@string/key_button_text_color"-->
+<!--            android:title="@string/button_text_color" />-->
 
-        <com.jrummyapps.android.colorpicker.ColorPreference
-            android:defaultValue="@color/primaryText"
-            android:key="@string/key_progress_text_color"
-            android:title="@string/progress_text_color" />
+<!--        <com.jrummyapps.android.colorpicker.ColorPreference-->
+<!--            android:defaultValue="@color/primaryText"-->
+<!--            android:key="@string/key_cancel_text_color"-->
+<!--            android:title="@string/cancel_text_color" />-->
+
+<!--        <com.jrummyapps.android.colorpicker.ColorPreference-->
+<!--            android:defaultValue="@color/primaryText"-->
+<!--            android:key="@string/key_progress_text_color"-->
+<!--            android:title="@string/progress_text_color" />-->
 
     </PreferenceCategory>
 
