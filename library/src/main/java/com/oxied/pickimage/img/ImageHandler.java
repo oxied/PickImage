@@ -12,7 +12,10 @@ import android.provider.MediaStore;
 import com.oxied.pickimage.bundle.PickSetup;
 import com.oxied.pickimage.enums.EPickType;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 
 import static android.graphics.BitmapFactory.decodeStream;
 
@@ -23,7 +26,8 @@ import static android.graphics.BitmapFactory.decodeStream;
 public class ImageHandler {
 
     private Context context;
-    private Uri uri;
+    private Uri originalUri;
+    private Uri outputUri;
     private EPickType provider;
     private PickSetup setup;
 
@@ -36,7 +40,12 @@ public class ImageHandler {
     }
 
     public ImageHandler uri(Uri uri) {
-        this.uri = uri;
+        this.originalUri = uri;
+        return this;
+    }
+
+    public ImageHandler outputUri(Uri uri) {
+        this.outputUri = uri;
         return this;
     }
 
@@ -66,7 +75,7 @@ public class ImageHandler {
         int rotate = 0;
         try {
 
-            ExifInterface exif = new ExifInterface(uri.getPath());
+            ExifInterface exif = new ExifInterface(originalUri.getPath());
             int orientation = exif.getAttributeInt(
                     ExifInterface.TAG_ORIENTATION,
                     ExifInterface.ORIENTATION_NORMAL);
@@ -96,7 +105,7 @@ public class ImageHandler {
         String[] columns = {MediaStore.Images.Media.ORIENTATION};
         Cursor cursor = null;
         try {
-            cursor = context.getContentResolver().query(uri, columns, null, null, null);
+            cursor = context.getContentResolver().query(originalUri, columns, null, null, null);
             if (cursor != null && cursor.moveToFirst()) {
                 int orientationColumnIndex = cursor.getColumnIndex(columns[0]);
                 result = cursor.getInt(orientationColumnIndex);
@@ -131,7 +140,7 @@ public class ImageHandler {
 
     public Bitmap decode() throws FileNotFoundException {
         //Notify image changed
-        context.getContentResolver().notifyChange(uri, null);
+        context.getContentResolver().notifyChange(originalUri, null);
 
         if (setup.getWidth() == 0 && setup.getHeight() == 0) {
             setup.setWidth(setup.getMaxSize());
@@ -149,22 +158,55 @@ public class ImageHandler {
         if (provider.equals(EPickType.CAMERA) && setup.isFlipped())
             bitmap = flip(bitmap);
 
-        return rotateIfNeeded(bitmap);
+        bitmap = rotateIfNeeded(bitmap);
+
+        if (setup.getSaveDecodedToFile()) {
+            saveDecodedBitmapToFile(bitmap);
+        }
+
+        return bitmap;
     }
 
-    public Uri getUri() {
-        return uri;
-    }
+    public void saveDecodedBitmapToFile(Bitmap bitmap) {
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, stream);
+        byte[] byteArray = stream.toByteArray();
 
-    public String getUriPath() {
-        if (provider.equals(EPickType.CAMERA)) {
-            return uri.getPath();
-        } else {
-            return getGalleryPath();
+        try {
+            //convert array of bytes into file
+            FileOutputStream fileOutputStream = new FileOutputStream(new File(getOutputUriPath()));
+            fileOutputStream.write(byteArray);
+            fileOutputStream.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
-    private String getGalleryPath() {
+    public Uri getOriginalUri() {
+        return originalUri;
+    }
+
+    public String getOriginalUriPath() {
+        if (provider.equals(EPickType.CAMERA)) {
+            return originalUri.getPath();
+        } else {
+            return getGalleryPath(originalUri);
+        }
+    }
+
+    public Uri getOutputUri() {
+        return outputUri;
+    }
+
+    public String getOutputUriPath() {
+        if (provider.equals(EPickType.CAMERA) || setup.getSaveDecodedToFile()) {
+            return outputUri.getPath();
+        } else {
+            return getGalleryPath(outputUri);
+        }
+    }
+
+    private String getGalleryPath(Uri uri) {
         Cursor cursor = null;
         try {
             String[] proj = {MediaStore.Images.Media.DATA};
@@ -184,7 +226,7 @@ public class ImageHandler {
     private BitmapFactory.Options getOptions() throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
-        decodeStream(context.getContentResolver().openInputStream(uri), null, options);
+        decodeStream(context.getContentResolver().openInputStream(originalUri), null, options);
 
         int w = options.outWidth;
         int h = options.outHeight;
@@ -205,7 +247,7 @@ public class ImageHandler {
 
 
     private Bitmap scaleDown() throws FileNotFoundException {
-        return decodeStream(context.getContentResolver().openInputStream(uri), null, getOptions());
+        return decodeStream(context.getContentResolver().openInputStream(originalUri), null, getOptions());
     }
 
     public Bitmap resize() throws FileNotFoundException {

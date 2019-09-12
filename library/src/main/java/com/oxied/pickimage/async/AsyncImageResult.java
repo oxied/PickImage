@@ -1,6 +1,7 @@
 package com.oxied.pickimage.async;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.AsyncTask;
 
 import com.oxied.pickimage.R;
@@ -55,14 +56,24 @@ public class AsyncImageResult extends AsyncTask<Intent, Void, PickResult> {
             boolean fromCamera = resolver.fromCamera(data);
 
             //Instance of a helper class
+
+            Uri originalUri = fromCamera ? resolver.cameraUri() : data.getData();
+            Uri outputUri;
+            if (weakSetup.get().getSaveDecodedToFile()) {
+                outputUri = fromCamera ? originalUri : resolver.cameraUri();
+            } else {
+                outputUri = originalUri;
+            }
+
             ImageHandler imageHandler = ImageHandler
                     .with(resolver.getActivity()).setup(weakSetup.get())
                     .provider(fromCamera ? EPickType.CAMERA : EPickType.GALLERY)
-                    .uri(fromCamera ? resolver.cameraUri() : data.getData());
+                    .uri(originalUri)
+                    .outputUri(outputUri);
 
             //Setting uri and path for result
-            result.setUri(imageHandler.getUri())
-                    .setPath(imageHandler.getUriPath())
+            result.setUri(imageHandler.getOutputUri())
+                    .setPath(imageHandler.getOutputUriPath())
                     .setBitmap(imageHandler.decode());
 
             long passedTime = System.currentTimeMillis() - startTime;

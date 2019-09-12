@@ -1,7 +1,12 @@
 # Fork of https://github.com/jrvansuita/PickImage
-- Added support for multiple camera files and storing them on sdcard/Pictures/[AppName]
+
+What's different:
+- Can save taken camera pictures inside storage/Pictures/[app_name] folder.
+- Added support for saving scaled bitmap into file (.jpg format is used).
 - Moved to AndroidX instead of android support library
 - Added support for Android 8 (Oreo)
+
+- Support for Android 10 TBD
 
 <!-- Library Logo -->
 <img src="https://github.com/jrvansuita/PickImage/blob/master/app/src/main/res/mipmap-xxxhdpi/ic_launcher.png?raw=true" align="left" hspace="1" vspace="1">
@@ -138,7 +143,8 @@ PickSetup setup = new PickSetup()
             .setCameraToPictures(false)
             .setMinLoadingTime(2000); //in ms. 1000 is default to avoid dialog flipping
             .setGalleryIcon(yourIcon)
-            .setCameraIcon(yourIcon);
+            .setCameraIcon(yourIcon)
+            .setSaveDecodedToFile(true);
 /*... and more to come. */
 ```
 
@@ -174,6 +180,11 @@ dialog.dismiss();
 new PickSetup().setWidth(600).setHeight(800);
 ```
 
-     
+
+#### Force a specific MAX size of any dimension to be scaled proportionally.
+```java
+new PickSetup().setMaxSize(1000); // will produce 1000 px in one dimension and <= 1000 in other. 
+```
+
 # Sample app code.
  You can take a look at the sample app [located on this project](/app/).

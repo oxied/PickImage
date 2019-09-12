@@ -55,6 +55,8 @@ public class PickSetup implements Serializable {
 
     private int uxLoadingSleep;
 
+    private boolean saveToFile;
+
     @OrientationMode
     private int buttonOrientation;
 
@@ -281,6 +283,18 @@ public class PickSetup implements Serializable {
         return this;
     }
 
+    public boolean getSaveDecodedToFile() {
+        return saveToFile;
+    }
+
+    /**
+     * Saved scaled bitmap to file and return uri to it in result. JPG always
+     */
+    public PickSetup setSaveDecodedToFile(boolean saveToFile) {
+        this.saveToFile = saveToFile;
+        return this;
+    }
+
     @IconGravity
     public int getIconGravity() {
         return iconGravity;
@@ -313,7 +327,8 @@ public class PickSetup implements Serializable {
                 .setGalleryIcon(R.drawable.gallery)
                 .setSystemDialog(false)
                 .setCameraToPictures(true)
-                .setMinLoadingTime(1000); //in ms
+                .setMinLoadingTime(1000) //in ms
+                .setSaveDecodedToFile(false);
     }
 
 }
