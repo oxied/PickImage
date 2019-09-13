@@ -142,13 +142,10 @@ public class ImageHandler {
         //Notify image changed
         context.getContentResolver().notifyChange(originalUri, null);
 
-        Bitmap bitmap;
+        Bitmap bitmap = resize();
 
-        if (setup.getWidth() == 0 && setup.getHeight() == 0) {
-            bitmap = scaleDown();
-        } else {
-            bitmap = resize();
-        }
+        if (bitmap == null)
+            throw new FileNotFoundException("File not found");
 
         if (provider.equals(EPickType.CAMERA) && setup.isFlipped())
             bitmap = flip(bitmap);
@@ -218,68 +215,68 @@ public class ImageHandler {
         }
     }
 
-    private Bitmap scaleDown() throws FileNotFoundException {
-        Bitmap bitmap = decodeStream(context.getContentResolver().openInputStream(originalUri), null, new BitmapFactory.Options());
-
-        if (bitmap == null)
-            throw new FileNotFoundException("File not found");
-
-        float w = bitmap.getWidth();
-        float h = bitmap.getHeight();
-
-        int newWidth;
-        int newHeight;
-
-        if (w <= setup.getMaxSize() && h <= setup.getMaxSize()) {
-            newWidth = (int) w;
-            newHeight = (int) h;
-        } else {
-            float scaleWidth = w / setup.getMaxSize();
-            float scaleHeight = h / setup.getMaxSize();
-            float scale;
-
-            if (scaleWidth >= scaleHeight) {
-                scale = scaleWidth;
-            } else {
-                scale = scaleHeight;
-            }
-
-            newWidth = (int) (w / scale);
-            if (newWidth > setup.getMaxSize())
-                newWidth = setup.getMaxSize();
-
-            newHeight = (int) (h / scale);
-            if (newHeight > setup.getMaxSize())
-                newHeight = setup.getMaxSize();
-        }
-
-        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
-    }
-
     public Bitmap resize() throws FileNotFoundException {
-        Bitmap scaleDownBitmap = decodeStream(context.getContentResolver().openInputStream(originalUri), null, getOptions());
-        return Bitmap.createScaledBitmap(scaleDownBitmap, setup.getWidth(), setup.getHeight(), false);
+        BitmapFactory.Options oldOptions = getOptions();
+        int newWidth = oldOptions.outWidth;
+        int newHeight = oldOptions.outHeight;
+        int ratioForPreScale = oldOptions.inSampleSize;
+
+        BitmapFactory.Options newOptions = new BitmapFactory.Options();
+        newOptions.inSampleSize = ratioForPreScale;
+        Bitmap scaledBitmap = decodeStream(context.getContentResolver().openInputStream(originalUri), null, newOptions);
+
+        return Bitmap.createScaledBitmap(scaledBitmap, newWidth, newHeight, false);
     }
 
     private BitmapFactory.Options getOptions() throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inJustDecodeBounds = true;
+        options.inJustDecodeBounds = true; // to not load bitmap into memory
         decodeStream(context.getContentResolver().openInputStream(originalUri), null, options);
 
-        int w = options.outWidth;
-        int h = options.outHeight;
-        int scale = 1;
-        while (true) {
-            if (w / 2 < setup.getWidth() || h / 2 < setup.getHeight())
-                break;
+        float w = options.outWidth;
+        float h = options.outHeight;
+        float scale = 1;
 
-            w /= 2;
-            h /= 2;
-            scale *= 2;
+        if (setup.getWidth() == 0 && setup.getHeight() == 0) {
+            int newWidth;
+            int newHeight;
+
+            if (w <= setup.getMaxSize() && h <= setup.getMaxSize()) {
+                newWidth = (int) w;
+                newHeight = (int) h;
+            } else {
+                float scaleWidth = w / setup.getMaxSize();
+                float scaleHeight = h / setup.getMaxSize();
+
+                if (scaleWidth >= scaleHeight) {
+                    scale = scaleWidth;
+                } else {
+                    scale = scaleHeight;
+                }
+
+                newWidth = (int) (w / scale);
+                if (newWidth > setup.getMaxSize())
+                    newWidth = setup.getMaxSize();
+
+                newHeight = (int) (h / scale);
+                if (newHeight > setup.getMaxSize())
+                    newHeight = setup.getMaxSize();
+            }
+
+            options.outWidth = newWidth;
+            options.outHeight = newHeight;
+        } else {
+            if (w > setup.getWidth() || h > setup.getHeight()) {
+                float scaleWidth = w / setup.getWidth();
+                float scaleHeight = h / setup.getHeight();
+                scale = scaleWidth >= scaleHeight ? scaleWidth : scaleHeight;
+            }
+
+            options.outWidth = setup.getWidth();
+            options.outHeight = setup.getHeight();
         }
 
-        options = new BitmapFactory.Options();
-        options.inSampleSize = scale;
+        options.inSampleSize = (int) scale;
         return options;
     }
 
