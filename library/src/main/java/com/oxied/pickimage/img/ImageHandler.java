@@ -142,14 +142,9 @@ public class ImageHandler {
         //Notify image changed
         context.getContentResolver().notifyChange(originalUri, null);
 
-        if (setup.getWidth() == 0 && setup.getHeight() == 0) {
-            setup.setWidth(setup.getMaxSize());
-            setup.setHeight(setup.getMaxSize());
-        }
-
         Bitmap bitmap;
 
-        if ((setup.getWidth() - setup.getHeight()) == 0) {
+        if (setup.getWidth() == 0 && setup.getHeight() == 0) {
             bitmap = scaleDown();
         } else {
             bitmap = resize();
@@ -223,6 +218,49 @@ public class ImageHandler {
         }
     }
 
+    private Bitmap scaleDown() throws FileNotFoundException {
+        Bitmap bitmap = decodeStream(context.getContentResolver().openInputStream(originalUri), null, new BitmapFactory.Options());
+
+        if (bitmap == null)
+            throw new FileNotFoundException("File not found");
+
+        float w = bitmap.getWidth();
+        float h = bitmap.getHeight();
+
+        int newWidth;
+        int newHeight;
+
+        if (w <= setup.getMaxSize() && h <= setup.getMaxSize()) {
+            newWidth = (int) w;
+            newHeight = (int) h;
+        } else {
+            float scaleWidth = w / setup.getMaxSize();
+            float scaleHeight = h / setup.getMaxSize();
+            float scale;
+
+            if (scaleWidth >= scaleHeight) {
+                scale = scaleWidth;
+            } else {
+                scale = scaleHeight;
+            }
+
+            newWidth = (int) (w / scale);
+            if (newWidth > setup.getMaxSize())
+                newWidth = setup.getMaxSize();
+
+            newHeight = (int) (h / scale);
+            if (newHeight > setup.getMaxSize())
+                newHeight = setup.getMaxSize();
+        }
+
+        return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, false);
+    }
+
+    public Bitmap resize() throws FileNotFoundException {
+        Bitmap scaleDownBitmap = decodeStream(context.getContentResolver().openInputStream(originalUri), null, getOptions());
+        return Bitmap.createScaledBitmap(scaleDownBitmap, setup.getWidth(), setup.getHeight(), false);
+    }
+
     private BitmapFactory.Options getOptions() throws FileNotFoundException {
         BitmapFactory.Options options = new BitmapFactory.Options();
         options.inJustDecodeBounds = true;
@@ -243,15 +281,6 @@ public class ImageHandler {
         options = new BitmapFactory.Options();
         options.inSampleSize = scale;
         return options;
-    }
-
-
-    private Bitmap scaleDown() throws FileNotFoundException {
-        return decodeStream(context.getContentResolver().openInputStream(originalUri), null, getOptions());
-    }
-
-    public Bitmap resize() throws FileNotFoundException {
-        return Bitmap.createScaledBitmap(scaleDown(), setup.getWidth(), setup.getHeight(), false);
     }
 
 }
