@@ -171,6 +171,16 @@ public abstract class PickImageBaseDialog extends DialogFragment implements IPic
 
 
     private void onSetup() {
+        if (!(showCamera && showGallery)) { // only one is chosen from 2 options. So run immediately
+            Util.gone(card, true);
+            if (showCamera) {
+                launchCamera();
+            } else {
+                launchGallery();
+            }
+            return;
+        }
+
         if (setup.getBackgroundColor() != android.R.color.white) {
             card.setCardBackgroundColor(setup.getBackgroundColor());
 
